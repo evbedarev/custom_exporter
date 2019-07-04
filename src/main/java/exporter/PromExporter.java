@@ -4,11 +4,12 @@ import io.prometheus.client.Gauge;
 import io.prometheus.client.vertx.MetricsHandler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,23 +43,9 @@ public class PromExporter {
     }
 
     private List<String> readLines(String confFilePath) throws IOException {
-        int c;
-        char ch;
-        List<StringBuffer> textByLine = new ArrayList<>();
-        StringBuffer stringBuffer = new StringBuffer();
-
-        try (FileReader fileReader = new FileReader(confFilePath)) {
-            while ((c = fileReader.read()) != -1) {
-                ch = (char) c;
-                if (ch == '\n') {
-                    textByLine.add(stringBuffer);
-                    stringBuffer = new StringBuffer();
-                } else {
-                    stringBuffer.append(ch);
-                }
-            }
-        }
-        return Arrays.asList(textByLine.toString().split(","));
+        List<String> strings = new ArrayList<>();
+        Files.lines(Paths.get(confFilePath), StandardCharsets.UTF_8).forEach(strings::add);
+        return strings;
     }
 
     private Boolean parseFile(List<String> fileStrings) {
