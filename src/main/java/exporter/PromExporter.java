@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class PromExporter {
     private static final Gauge g = Gauge.build().name("gauge_reuters_available").help("gauge_reuters_available").register();
     private static final Pattern ERROR_PATTERN = Pattern.compile(".*(ERROR).*");
@@ -44,14 +43,16 @@ public class PromExporter {
 
     private List<String> readLines(String confFilePath) throws IOException {
         List<String> strings = new ArrayList<>();
-        Files.lines(Paths.get(confFilePath), StandardCharsets.UTF_8).forEach(strings::add);
+        Files.lines(Paths.get(confFilePath), StandardCharsets.UTF_8).forEach(p -> {
+            if (checkEnterInInterval(p)) {
+                strings.add(p);
+            }
+        });
         return strings;
     }
 
     private Boolean parseFile(List<String> fileStrings) {
         for (String str : fileStrings) {
-            if (!checkEnterInInterval(str))
-                continue;
             matcher = ERROR_PATTERN.matcher(str);
             if (matcher.find()) {
                 return true;
