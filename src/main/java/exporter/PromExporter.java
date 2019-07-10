@@ -4,6 +4,9 @@ import io.prometheus.client.Gauge;
 import io.prometheus.client.vertx.MetricsHandler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,6 +46,9 @@ public class PromExporter {
 
     private List<String> readLines(String confFilePath) throws IOException {
         List<String> strings = new ArrayList<>();
+        if (!new File(confFilePath).exists()) {
+            throw new FileNotFoundException("Config file " + confFilePath + " not found!!!");
+        }
         Files.lines(Paths.get(confFilePath), StandardCharsets.UTF_8).forEach(p -> {
             if (checkEnterInInterval(p)) {
                 strings.add(p);

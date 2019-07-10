@@ -1,37 +1,27 @@
 package exporter;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import javax.annotation.PostConstruct;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Properties;
 
-@SpringBootApplication
-@EnableAutoConfiguration
 public class Main {
-    @Value("${server.port}")
-    String port;
-
-    @Value("${server.logPath}")
-    String logPath;
-
-    @Value("${server.period}")
-    String period;
+    private static String period;
+    private static String logPath;
+    private static String port;
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Main.class, args);
-    }
+        Properties property = new Properties();
+        try (FileInputStream fileInputStream = new FileInputStream(Paths.get(".").toAbsolutePath().normalize().toString() +
+                "/application.properties")) {
+            property.load(fileInputStream);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
 
-    @PostConstruct
-    public void init() throws Exception {
-        PromExporter promExporter = new PromExporter(Integer.valueOf(period));
-        promExporter.startExporter(logPath, Integer.valueOf(port));
-    }
 
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-        return new PropertySourcesPlaceholderConfigurer();
+        PromExporter promExporter = new PromExporter(Integer.valueOf(property.getProperty("server.period")));
+        promExporter.startExporter(property.getProperty("server.logPath"),
+                Integer.valueOf(property.getProperty("server.port")));
     }
 }
