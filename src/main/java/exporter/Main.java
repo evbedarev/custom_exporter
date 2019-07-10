@@ -1,20 +1,24 @@
 package exporter;
 
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 public class Main {
-    private static String period;
-    private static String logPath;
-    private static String port;
-
+    public static final String PATH_TO_LOG = "/tmp/debug.log";
     public static void main(String[] args) throws Exception {
         Properties property = new Properties();
+        writeToLog(" Search propfile " + Paths.get(".").toAbsolutePath().normalize().toString() +
+                "/application.properties");
         try (FileInputStream fileInputStream = new FileInputStream(Paths.get(".").toAbsolutePath().normalize().toString() +
                 "/application.properties")) {
             property.load(fileInputStream);
+            writeToLog("Load port " + property.getProperty("server.port"));
+            writeToLog("Load logPath " + property.getProperty("server.logPath"));
+            writeToLog("Load period " + property.getProperty("server.port"));
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -23,5 +27,11 @@ public class Main {
         PromExporter promExporter = new PromExporter(Integer.valueOf(property.getProperty("server.period")));
         promExporter.startExporter(property.getProperty("server.logPath"),
                 Integer.valueOf(property.getProperty("server.port")));
+    }
+
+    public static void writeToLog(String text) throws IOException {
+        try (FileWriter fw=new FileWriter(PATH_TO_LOG)) {
+            fw.write(LocalDateTime.now() + text);
+        }
     }
 }

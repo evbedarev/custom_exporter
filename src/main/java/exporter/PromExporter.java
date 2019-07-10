@@ -44,12 +44,13 @@ public class PromExporter {
         }
     }
 
-    private List<String> readLines(String confFilePath) throws IOException {
+    private List<String> readLines(String logPath) throws IOException {
         List<String> strings = new ArrayList<>();
-        if (!new File(confFilePath).exists()) {
-            throw new FileNotFoundException("Config file " + confFilePath + " not found!!!");
+        if (!new File(logPath).exists()) {
+            Main.writeToLog("Log file " + logPath + " not found!!!");
+            throw new RuntimeException("Log file " + logPath + " not found!!!");
         }
-        Files.lines(Paths.get(confFilePath), StandardCharsets.UTF_8).forEach(p -> {
+        Files.lines(Paths.get(logPath), StandardCharsets.UTF_8).forEach(p -> {
             if (checkEnterInInterval(p)) {
                 strings.add(p);
             }
