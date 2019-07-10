@@ -47,6 +47,7 @@ public class PromExporter {
     private List<String> readLines(String logPath) throws IOException {
         List<String> strings = new ArrayList<>();
         if (!new File(logPath).exists()) {
+            g.set(2);
             Main.writeToLog("Log file " + logPath + " not found!!!");
             throw new RuntimeException("Log file " + logPath + " not found!!!");
         }
