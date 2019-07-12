@@ -5,13 +5,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class Main {
     public static final Map<String, String> appProps = new HashMap<>();
-    public static final String PATH_TO_LOG = Paths.get(".").toAbsolutePath().normalize().toString() + "/debug.log";
+    private static final String PATH_TO_LOG = Paths.get(".").toAbsolutePath().normalize().toString() + "/debug.log";
 
     public static void main(String[] args) throws Exception {
         writeToLog(" Search propfile " + Paths.get(".").toAbsolutePath().normalize().toString() +
@@ -31,6 +29,7 @@ public class Main {
         promExporter.startExporter(appProps.get("logPath"),
                 Integer.valueOf(appProps.get("port")),
                 appProps.get("pattern"));
+//        System.out.println(appProps.get("ipElk"));
     }
 
     public static void writeToLog(String text) throws IOException {

@@ -22,23 +22,25 @@ import org.joda.time.DateTime;
 import java.security.KeyException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class PrometheusGaugeElk implements StartMonitoring {
     private Gauge g;
     private String gaugeName;
     private Map<String, String> props;
+    private HttpHost[] elkHosts;
 
     public PrometheusGaugeElk(String gaugeName) {
         this.gaugeName = gaugeName;
         this.props = Main.appProps;
         g = Gauge.build().name(gaugeName).help(gaugeName).register();
+        elkHosts = generateStackIpAddresses();
     }
 
     @Override
     public void startMonitoring() throws Exception {
         if (verifyMap()) {
-            RestHighLevelClient esClient = new RestHighLevelClient(RestClient.builder(new HttpHost(props.get("ipElk"),
-                    Integer.valueOf(props.get("portElk")), "http")));
+            RestHighLevelClient esClient = new RestHighLevelClient(RestClient.builder(elkHosts));
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
             sourceBuilder.timeout(new TimeValue(600, TimeUnit.SECONDS));
             sourceBuilder.from(0);
@@ -50,7 +52,7 @@ public class PrometheusGaugeElk implements StartMonitoring {
             SearchResponse searchResponse;
             searchResponse = esClient.search(searchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
-            System.out.println(hits.totalHits);
+//            System.out.println(hits.totalHits);
             if (hits.totalHits > 0) {
                 g.set(1);
             } else {
@@ -80,5 +82,17 @@ public class PrometheusGaugeElk implements StartMonitoring {
                 props.containsKey("message") &&
                 props.containsKey("ipElk") &&
                 props.containsKey("portElk");
+    }
+
+    private HttpHost[] generateStackIpAddresses() {
+        Pattern pattern = Pattern.compile(",");
+        String[] hosts = pattern.split(props.get("ipElk"));
+        HttpHost[] arrayHosts = new HttpHost[hosts.length];
+        for (int i=0; i < hosts.length; i++) {
+//            System.out.println(hosts[i]);
+            arrayHosts[i] = new HttpHost(hosts[i].trim(),
+                    Integer.valueOf(props.get("portElk")), "http");
+        }
+        return arrayHosts;
     }
 }
