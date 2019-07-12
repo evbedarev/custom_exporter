@@ -1,9 +1,13 @@
 package exporter;
 
-import io.prometheus.client.Gauge;
+import exporter.elk_monitoring.PrometheusGaugeElk;
+import exporter.log_monitoring.GaugeOne;
 import io.prometheus.client.vertx.MetricsHandler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class PromExporter {
@@ -19,7 +23,9 @@ public class PromExporter {
         router.route("/metrics").handler(new MetricsHandler());
         vertx.createHttpServer().requestHandler(router::accept).listen(port);
         GaugeOne gaugeOne = new GaugeOne("gauge_reuters_available", Pattern.compile(pattern), logPath, period);
-        PrometheusGauge prometheusGauge = new PrometheusGauge(gaugeOne);
+        Map<String, String> elkProps = new HashMap<>();
+        StartMonitoring prometheusGauge = new PrometheusGaugeElk("gauge_reuters_available");//new PrometheusGaugeLog(gaugeOne);
+
         while (true) {
             prometheusGauge.startMonitoring();
             Thread.sleep(30000);

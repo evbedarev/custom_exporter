@@ -1,5 +1,7 @@
-package exporter;
+package exporter.log_monitoring;
 
+import exporter.Main;
+import exporter.StartMonitoring;
 import io.prometheus.client.Gauge;
 
 import java.io.File;
@@ -13,13 +15,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PrometheusGauge {
+public class PrometheusGaugeLog implements StartMonitoring {
     private Gauge g;
     private Matcher matcher;
     private GaugeOne gaugeOne;
     private static final Pattern DATE_TIME_PATTERN = Pattern.compile(".*(\\d{4}-\\d{1,2}-\\d{1,2}) (\\d{2}:\\d{2}:\\d{2}).*");
 
-    public PrometheusGauge(GaugeOne gaugeOne) {
+    public PrometheusGaugeLog(GaugeOne gaugeOne) {
         this.gaugeOne = gaugeOne;
         g = Gauge.build().name(gaugeOne.getName()).help(gaugeOne.getName()).register();
     }
@@ -61,10 +63,8 @@ public class PrometheusGauge {
     boolean checkEnterInInterval(String fileString) {
         matcher = DATE_TIME_PATTERN.matcher(fileString);
         if (matcher.find()) {
-//            System.out.println(matcher.group(1) + "T" + matcher.group(2));
             LocalDateTime ldtm = LocalDateTime.parse(matcher.group(1) + "T" + matcher.group(2));
             LocalDateTime ldtmNow = LocalDateTime.now();
-//            System.out.println(ldtm);
             return ldtm.isAfter(ldtmNow.minusMinutes(gaugeOne.getPeriod()));
         }
         return false;
