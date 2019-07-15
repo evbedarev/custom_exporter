@@ -50,5 +50,6 @@ public class Main {
         appProps.put("pattern", property.getProperty("log.pattern"));
         appProps.put("period", property.getProperty("server.period"));
         appProps.put("portElk", property.getProperty("elk.Port"));
+        appProps.put("gaugeName", property.getProperty("gauge.name"));
     }
 }
