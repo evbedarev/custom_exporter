@@ -24,12 +24,12 @@ public class Main {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+//        System.out.println(appProps.get("ipElk"));
 
         PromExporter promExporter = new PromExporter(Integer.valueOf(appProps.get("period")));
         promExporter.startExporter(appProps.get("logPath"),
                 Integer.valueOf(appProps.get("port")),
                 appProps.get("pattern"));
-//        System.out.println(appProps.get("ipElk"));
     }
 
     public static void writeToLog(String text) throws IOException {
