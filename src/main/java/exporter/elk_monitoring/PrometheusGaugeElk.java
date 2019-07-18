@@ -39,7 +39,7 @@ public class PrometheusGaugeElk implements StartMonitoring {
     public void startMonitoring() throws Exception {
         if (verifyMap()) {
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-            sourceBuilder.timeout(new TimeValue(600, TimeUnit.SECONDS));
+            sourceBuilder.timeout(new TimeValue(6000, TimeUnit.SECONDS));
             sourceBuilder.from(0);
             sourceBuilder.size(10); // Size of result hits in scroll
             sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
@@ -55,10 +55,17 @@ public class PrometheusGaugeElk implements StartMonitoring {
             } else {
                 g.set(0);
             }
-            esClient.close();
+
         } else {
+            esClient.close();
             throw new KeyException("Not found keys in Map props");
+
         }
+    }
+
+    @Override
+    public void stopMonitoring() throws Exception {
+        esClient.close();
     }
 
     private BoolQueryBuilder createBuilder() {
@@ -98,4 +105,6 @@ public class PrometheusGaugeElk implements StartMonitoring {
         }
         return arrayHosts;
     }
+
+
 }

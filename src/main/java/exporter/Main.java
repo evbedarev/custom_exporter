@@ -17,19 +17,16 @@ public class Main {
         try (FileInputStream fileInputStream = new FileInputStream(Paths.get(".").toAbsolutePath().normalize().toString() +
                 "/application.properties")) {
             fillProperties(fileInputStream);
-            writeToLog("Load port " + appProps.get("portElk"));
-            writeToLog("Load logPath " + appProps.get("logPath"));
-            writeToLog("Load period " + appProps.get("period"));
-            writeToLog("Load pattern " + appProps.get("pattern"));
+            for (Map.Entry<String, String> entry: appProps.entrySet()) {
+                writeToLog("Load " + entry.getKey() + " " + entry.getValue());
+            }
+
         } catch (IOException exception) {
             exception.printStackTrace();
         }
 //        System.out.println(appProps.get("ipElk"));
-
-        PromExporter promExporter = new PromExporter(Integer.valueOf(appProps.get("period")));
-        promExporter.startExporter(appProps.get("logPath"),
-                Integer.valueOf(appProps.get("port")),
-                appProps.get("pattern"));
+        PromExporter promExporter = new PromExporter();
+        promExporter.startExporter();
     }
 
     public static void writeToLog(String text) throws IOException {
@@ -46,8 +43,6 @@ public class Main {
         appProps.put("level", property.getProperty("elk.level"));
         appProps.put("message", property.getProperty("elk.message"));
         appProps.put("ipElk", property.getProperty("elk.ipElk"));
-        appProps.put("logPath", property.getProperty("server.logPath"));
-        appProps.put("pattern", property.getProperty("log.pattern"));
         appProps.put("period", property.getProperty("server.period"));
         appProps.put("portElk", property.getProperty("elk.Port"));
         appProps.put("gaugeName", property.getProperty("gauge.name"));

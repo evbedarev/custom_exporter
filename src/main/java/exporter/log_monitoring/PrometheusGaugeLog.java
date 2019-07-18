@@ -40,6 +40,11 @@ public class PrometheusGaugeLog implements StartMonitoring {
         }
     }
 
+    @Override
+    public void stopMonitoring() throws Exception {
+        System.out.println("close");
+    }
+
     private List<String> readLines(String logPath) throws IOException {
         List<String> strings = new ArrayList<>();
         Files.lines(Paths.get(logPath), StandardCharsets.UTF_8).forEach(p -> {
