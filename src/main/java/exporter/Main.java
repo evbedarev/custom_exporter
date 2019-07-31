@@ -9,6 +9,7 @@ import java.util.*;
 
 public class Main {
     public static final Map<String, String> appProps = new HashMap<>();
+    public static int countGauge;
     private static final String PATH_TO_LOG = Paths.get(".").toAbsolutePath().normalize().toString() + "/debug.log";
 
     public static void main(String[] args) throws Exception {
@@ -38,13 +39,17 @@ public class Main {
     private static void fillProperties(FileInputStream fileInputStream) throws IOException {
         Properties property = new Properties();
         property.load(fileInputStream);
-        appProps.put("port", property.getProperty("server.port"));
-        appProps.put("service", property.getProperty("elk.service"));
-        appProps.put("level", property.getProperty("elk.level"));
-        appProps.put("message", property.getProperty("elk.message"));
-        appProps.put("ipElk", property.getProperty("elk.ipElk"));
+        countGauge= Integer.valueOf(property.getProperty("count_gauge"));
+        appProps.put("port" , property.getProperty("server.port"));
         appProps.put("period", property.getProperty("server.period"));
         appProps.put("portElk", property.getProperty("elk.Port"));
-        appProps.put("gaugeName", property.getProperty("gauge.name"));
+        appProps.put("ipElk", property.getProperty("elk.ipElk"));
+        appProps.put("countGauge", property.getProperty("count_gauge"));
+        for (int i = 0; i < countGauge; i++) {
+            appProps.put("service" + (i + 1), property.getProperty("elk" + (i + 1) +".service"));
+            appProps.put("level" + (i + 1), property.getProperty("elk" + (i + 1) + ".level"));
+            appProps.put("message" + (i + 1), property.getProperty("elk" + (i + 1) + ".message"));
+            appProps.put("gaugeName" + (i + 1), property.getProperty("gauge" + (i + 1) + ".name"));
+        }
     }
 }

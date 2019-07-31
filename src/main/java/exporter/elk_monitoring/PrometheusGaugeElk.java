@@ -26,11 +26,13 @@ import java.util.regex.Pattern;
 
 public class PrometheusGaugeElk implements StartMonitoring {
     private Gauge g;
+    private String indexGauge;
     private Map<String, String> props;
     private RestHighLevelClient esClient;
 
-    public PrometheusGaugeElk(String gaugeName) {
+    public PrometheusGaugeElk(String gaugeName, String indexGauge) {
         this.props = Main.appProps;
+        this.indexGauge = indexGauge;
         g = Gauge.build().name(gaugeName).help(gaugeName).register();
         esClient = new RestHighLevelClient(RestClient.builder(generateStackIpAddresses()));
     }
@@ -76,9 +78,9 @@ public class PrometheusGaugeElk implements StartMonitoring {
 //        System.out.println("period " + props.get("period"));
 
         return QueryBuilders.boolQuery()
-                .must(new MatchQueryBuilder("service", props.get("service"))) //"storm"
-                .must(new MatchQueryBuilder("level", props.get("level"))) //"ERROR"
-                .must(new MatchQueryBuilder("message", props.get("message"))) //"Wakeup error while waiting*"
+                .must(new MatchQueryBuilder("service", props.get("service" + indexGauge))) //"storm"
+                .must(new MatchQueryBuilder("level", props.get("level" + indexGauge))) //"ERROR"
+                .must(new MatchQueryBuilder("message", props.get("message" + indexGauge))) //"Wakeup error while waiting*"
                 .must(QueryBuilders.rangeQuery("@timestamp")
                         .gt(dateTime.minusMinutes(Integer.valueOf(props.get("period")))))
                 .must(QueryBuilders.rangeQuery("@timestamp")
@@ -86,9 +88,9 @@ public class PrometheusGaugeElk implements StartMonitoring {
     }
 
     private boolean verifyMap() {
-        return props.containsKey("service") &&
-                props.containsKey("level") &&
-                props.containsKey("message") &&
+        return props.containsKey("service" + indexGauge) &&
+                props.containsKey("level" + indexGauge) &&
+                props.containsKey("message" + indexGauge) &&
                 props.containsKey("ipElk") &&
                 props.containsKey("portElk");
     }
