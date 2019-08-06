@@ -9,19 +9,19 @@ import java.util.*;
 
 public class Main {
     public static final Map<String, String> appProps = new HashMap<>();
-    public static int countGauge;
     private static final String PATH_TO_LOG = Paths.get(".").toAbsolutePath().normalize().toString() + "/debug.log";
 
     public static void main(String[] args) throws Exception {
         writeToLog(" Search propfile " + Paths.get(".").toAbsolutePath().normalize().toString() +
                 "/application.properties");
-        try (FileInputStream fileInputStream = new FileInputStream(Paths.get(".").toAbsolutePath().normalize().toString() +
-                "/application.properties")) {
+        try (FileInputStream fileInputStream = new FileInputStream(Paths.get(".")
+                                                    .toAbsolutePath()
+                                                    .normalize()
+                                                    .toString() + "/application.properties")) {
             fillProperties(fileInputStream);
             for (Map.Entry<String, String> entry: appProps.entrySet()) {
                 writeToLog("Load " + entry.getKey() + " " + entry.getValue());
             }
-
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -39,17 +39,17 @@ public class Main {
     private static void fillProperties(FileInputStream fileInputStream) throws IOException {
         Properties property = new Properties();
         property.load(fileInputStream);
-        countGauge= Integer.valueOf(property.getProperty("count_gauge"));
+        int countGauge= Integer.valueOf(property.getProperty("count_gauge"));
         appProps.put("port" , property.getProperty("server.port"));
         appProps.put("period", property.getProperty("server.period"));
         appProps.put("portElk", property.getProperty("elk.Port"));
         appProps.put("ipElk", property.getProperty("elk.ipElk"));
         appProps.put("countGauge", property.getProperty("count_gauge"));
-        for (int i = 0; i < countGauge; i++) {
-            appProps.put("service" + (i + 1), property.getProperty("elk" + (i + 1) +".service"));
-            appProps.put("level" + (i + 1), property.getProperty("elk" + (i + 1) + ".level"));
-            appProps.put("message" + (i + 1), property.getProperty("elk" + (i + 1) + ".message"));
-            appProps.put("gaugeName" + (i + 1), property.getProperty("gauge" + (i + 1) + ".name"));
+        for (int i = 1; i < countGauge + 1; i++) {
+            appProps.put("service" + i, property.getProperty("elk" + i +".service"));
+            appProps.put("level" + i, property.getProperty("elk" + i + ".level"));
+            appProps.put("message" + i, property.getProperty("elk" + i + ".message"));
+            appProps.put("gaugeName" + i, property.getProperty("gauge" + i + ".name"));
         }
     }
 }
