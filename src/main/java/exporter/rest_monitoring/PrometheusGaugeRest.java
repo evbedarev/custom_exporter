@@ -1,44 +1,33 @@
 package exporter.rest_monitoring;
 
-import com.sun.security.ntlm.Client;
 import exporter.Main;
 import exporter.StartMonitoring;
 import io.prometheus.client.Gauge;
-import org.apache.http.HttpHost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-
 import java.security.KeyException;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 public class PrometheusGaugeRest implements StartMonitoring {
     private Gauge g;
     private Map<String, String> props;
-    private RestHighLevelClient esClient;
+    private RestRequest restRequest;
 
     public PrometheusGaugeRest(String gaugeName) {
         this.props = Main.appProps;
         g = Gauge.build().name(gaugeName).help(gaugeName).register();
+        restRequest = new RestRequest(props);
     }
 
     @Override
     public void startMonitoring() throws Exception {
         if (verifyMap()) {
-
-            if (1 > 0) {
+            int resp = restRequest.getResponseStatus();
+            if (resp == 200) {
                 g.set(1);
             } else {
                 g.set(0);
             }
 
         } else {
-            esClient.close();
             throw new KeyException("Not found keys in Map props");
 
         }
@@ -46,30 +35,14 @@ public class PrometheusGaugeRest implements StartMonitoring {
 
     @Override
     public void stopMonitoring() throws Exception {
-        esClient.close();
+        System.out.println("Stopping");
     }
-
 
     private boolean verifyMap() {
-        return props.containsKey("service") &&
-                props.containsKey("level") &&
-                props.containsKey("message") &&
-                props.containsKey("ipElk") &&
-                props.containsKey("portElk");
+        return props.containsKey("passphrase") &&
+                props.containsKey("keypass") &&
+                props.containsKey("pathToJks") &&
+                props.containsKey("pathClient") &&
+                props.containsKey("url");
     }
-
-    private HttpHost[] generateStackIpAddresses() {
-        Pattern pattern = Pattern.compile(",");
-        String[] hosts = pattern.split(props.get("ipElk"));
-        HttpHost[] arrayHosts = new HttpHost[hosts.length];
-        for (int i=0; i < hosts.length; i++) {
-//            System.out.println(hosts[i]);
-//            System.out.println(props.get("portElk"));
-            arrayHosts[i] = new HttpHost(hosts[i].trim(),
-                    Integer.valueOf(props.get("portElk")), "http");
-        }
-        return arrayHosts;
-    }
-
-
 }
